@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.sumativa1.ui.common.AppTopBar
 import com.example.sumativa1.data.UserRepository
+import com.example.sumativa1.util.isValidEmail
 import kotlinx.coroutines.launch
 
 @Composable
@@ -33,27 +34,38 @@ fun LoginScreen(nav: NavController) {
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Correo") },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
             )
             OutlinedTextField(
                 value = pass,
                 onValueChange = { pass = it },
                 label = { Text("Contraseña") },
-                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
             )
 
             Button(
                 onClick = {
+                    // Validación con EXTENSIÓN
+                    if (!email.trim().isValidEmail()) {
+                        scope.launch { snackbar.showSnackbar("Correo inválido") }
+                        return@Button
+                    }
+
+                    // Valida usando filter() (delegado en validateWithFilter del repo)
                     if (UserRepository.validate(email.trim(), pass)) {
                         nav.navigate("home")
                     } else {
-                        scope.launch {
-                            snackbar.showSnackbar("Correo o contraseña incorrectos")
-                        }
+                        scope.launch { snackbar.showSnackbar("Correo o contraseña incorrectos") }
                     }
                 },
-                modifier = Modifier.fillMaxWidth().height(64.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp),
                 shape = MaterialTheme.shapes.large
             ) { Text("Entrar") }
 
